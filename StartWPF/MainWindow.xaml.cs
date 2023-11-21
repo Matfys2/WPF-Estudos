@@ -40,9 +40,13 @@ namespace StartWPF
                     //imageStackPanel.Children.Add();
                 }
             }
+            catch (Exception)
+            {
+
+            }
         }
 
-       
+
     }
 
     class BitmapHelper
