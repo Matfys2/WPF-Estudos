@@ -1,11 +1,5 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using Emgu.CV;
-using Emgu.CV.Structure;
+﻿using System.Windows;
+using System.Windows.Input;
 
 namespace StartWPF
 {
@@ -14,68 +8,47 @@ namespace StartWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        // System.Runtime.InteropServices.dll
-        public static extern bool DeleteObject(IntPtr handle);
+        System.Windows.Point scrollMousePoint = new System.Windows.Point();
+        double hOff = 1;
 
         public MainWindow()
         {
             InitializeComponent();
-            LoadImages();
         }
 
-        private void LoadImages()
+        private void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            string imagePath = @"C:\Users\matheus.filipi\Documents\Downloads";
-            try
-            {
-                string[] imageFiles = Directory.GetFiles(imagePath, "*.png");
-                foreach (var imageFile in imageFiles)
-                {
-                    Mat imageMat = CvInvoke.Imread(imageFile, Emgu.CV.CvEnum.ImreadModes.Color);
-                    var image = imageMat.ToImage<Bgr, byte>();
+            scrollMousePoint = e.GetPosition(scrollViewer);
+            hOff = scrollViewer.HorizontalOffset;
+            scrollViewer.CaptureMouse();
+        }
 
-                    var teste = BitmapHelper.CreateBitmapSourceFromBitmap(image.ToBitmap());
-                    //Image img = (Image)teste;
-                    //imageStackPanel.Children.Add();
-                }
-            }
-            catch (Exception)
+        private void scrollViewer_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (scrollViewer.IsMouseCaptured)
             {
-
+                scrollViewer.ScrollToHorizontalOffset(hOff + (scrollMousePoint.X - e.GetPosition(scrollViewer).X));
             }
         }
 
-
-    }
-
-    class BitmapHelper
-    {
-        [DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
-
-        public static BitmapSource CreateBitmapSourceFromBitmap(Bitmap bitmap)
+        private void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (bitmap == null)
-            {
-                throw new ArgumentNullException("bitmap");
-            }
-            lock (bitmap)
-            {
-                IntPtr hBitmap = bitmap.GetHbitmap();
-                try
-                {
-                    return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                        hBitmap,
-                        IntPtr.Zero,
-                        Int32Rect.Empty,
-                        BitmapSizeOptions.FromEmptyOptions());
-                }
-                finally
-                {
-                    DeleteObject(hBitmap);
-                }
-            }
+            scrollViewer.ReleaseMouseCapture();
+        }
+
+        private void scrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + e.Delta);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
